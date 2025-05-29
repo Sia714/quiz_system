@@ -197,6 +197,7 @@ const Home = () => {
 
       const data = await res.json();
       if (res.ok) {
+        setOtp("");
         setStep(2);
         startOtpCountdown();
       } else {
@@ -244,7 +245,7 @@ const Home = () => {
       timeLeft -= 1;
       setOtpExpiry(timeLeft);
 
-      if (timeLeft === 60) {
+      if (timeLeft === 90) {
         setCanResendOtp(true);
       }
 
@@ -673,7 +674,7 @@ const Home = () => {
                   </Button>
                 ) : (
                   <Button fullWidth disabled sx={{ py: 1.5 }}>
-                    Wait ({otpExpiry - 60}s)
+                    Wait ({otpExpiry - 30}s)
                   </Button>
                 )}
                 <Button

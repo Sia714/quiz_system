@@ -1,12 +1,11 @@
 const express = require("express");
 const User = require("../models/User");
-const Quiz = require("../models/quiz"); // Assuming you have a Quiz model
-const Result = require("../models/StudentResponse"); // Assuming you have a Result model
+const Quiz = require("../models/quiz");
+const Result = require("../models/StudentResponse");
 const router = express.Router();
 
 const StudentRegistration = require("../models/StudentRegistration");
 
-// Teacher updates student section
 router.put("/update-section/:studentId", async (req, res) => {
   try {
     const { section } = req.body;
@@ -35,7 +34,7 @@ router.put("/quiz/update/:quizId", async (req, res) => {
     res.status(500).json({ error: "Failed to update quiz" });
   }
 });
-// Create a new quiz// Create a new quiz
+
 router.post("/quiz/create", async (req, res) => {
   try {
     const {
@@ -52,7 +51,6 @@ router.post("/quiz/create", async (req, res) => {
       questions,
     } = req.body;
 
-    // Basic validation
     if (
       !title ||
       !course ||
@@ -100,7 +98,6 @@ router.post("/quiz/create", async (req, res) => {
       }
     }
 
-    // Save quiz
     const newQuiz = new Quiz({
       title,
       course,
@@ -125,7 +122,6 @@ router.post("/quiz/create", async (req, res) => {
   }
 });
 
-// Get all quizzes created by teacher
 router.get("/quizzes", async (req, res) => {
   try {
     const { teacherId } = req.query;
