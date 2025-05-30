@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import OtpInput from "../components/otpInput";
 import {
   Box,
   Typography,
@@ -61,7 +62,10 @@ const Home = () => {
   const [role, setRole] = useState("student");
   const [otp, setOtp] = useState("");
   const [errors, setErrors] = useState({});
+  const [isOtpInvalid, setIsOtpInvalid] = useState(false);
+
   const formRef = useRef(null);
+
   const techStack = [
     { Icon: CodeIcon, label: "React + MUI", desc: "Frontend UI & logic" },
     {
@@ -210,9 +214,22 @@ const Home = () => {
 
   const verifyOtpAndRegister = async () => {
     try {
+      console.log("📤 Sending:", {
+        email,
+        otp,
+        name,
+        password,
+        role,
+        registrationNumber,
+      });
+      if (otp.length !== 6) {
+        alert("Please enter a valid 6-digit OTP.");
+        return;
+      }
       const res = await fetch(`${API_BASE}/auth/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+
         body: JSON.stringify({
           email,
           otp,
@@ -228,6 +245,10 @@ const Home = () => {
         alert("Registration successful!");
         window.location.href = "/";
       } else {
+        if (data.error === "Invalid OTP") {
+          setIsOtpInvalid(true);
+          setTimeout(() => setIsOtpInvalid(false), 500);
+        }
         alert(`Error: ${data.error}`);
       }
     } catch (err) {
@@ -512,6 +533,19 @@ const Home = () => {
                   {errors.fields}
                 </Typography>
               )}
+              <Typography>
+                No account yet?{" "}
+                <span
+                  onClick={() => setIsLogin(false)}
+                  style={{
+                    color: "#007bff",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Register
+                </span>
+              </Typography>
               <Button
                 fullWidth
                 variant="contained"
@@ -616,6 +650,20 @@ const Home = () => {
                   {errors.fields}
                 </Typography>
               )}
+              <Typography>
+                Account already exists?{" "}
+                <span
+                  onClick={() => setIsLogin(true)}
+                  style={{
+                    color: "#007bff",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Sign in
+                </span>
+              </Typography>
+
               <Button
                 variant="contained"
                 fullWidth
@@ -653,15 +701,29 @@ const Home = () => {
                   ? "Code expired. Please request a new one."
                   : `Expires in ${otpExpiry} seconds`}
               </Typography>
-              <TextField
-                fullWidth
-                size="small"
-                label="Enter Verification Code"
-                margin="normal"
-                onChange={(e) => setOtp(e.target.value)}
-                sx={{ mb: 3 }}
-                inputProps={{ maxLength: 6 }}
+              <OtpInput
+                onOtpChange={(val) => setOtp(val)}
+                hasError={isOtpInvalid}
+                disabled={isOtpExpired}
+                numInputs={6}
+                renderSeparator={<span>-</span>}
+                renderInput={(props) => <input {...props} />}
+                shouldAutoFocus
               />
+              <Typography>
+                Account already exists?{" "}
+                <span
+                  onClick={() => setIsLogin(true)}
+                  style={{
+                    color: "#007bff",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                    marginBottom: "2px",
+                  }}
+                >
+                  Sign in
+                </span>
+              </Typography>
               <Box sx={{ display: "flex", gap: 2 }}>
                 {canResendOtp ? (
                   <Button
@@ -674,7 +736,7 @@ const Home = () => {
                   </Button>
                 ) : (
                   <Button fullWidth disabled sx={{ py: 1.5 }}>
-                    Wait ({otpExpiry - 30}s)
+                    Wait ({otpExpiry - 90}s)
                   </Button>
                 )}
                 <Button
