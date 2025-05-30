@@ -15,14 +15,13 @@ const generateOTP = () =>
 router.post("/send-otp", async (req, res) => {
   const { email } = req.body;
 
-  if (!email) return res.status(400).json({ error: "Email is required" });
-
-  const otp = generateOTP();
-  const expiresAt = Date.now() + 5 * 60 * 1000; // Expires in 5 mins
-
-  otpStore[email] = { otp, expiresAt };
-
   try {
+    let user = await User.findOne({ email });
+    if (user) return res.status(400).json({ error: "User already exists" });
+    const otp = generateOTP();
+    const expiresAt = Date.now() + 2 * 60 * 1000; // Expires in 2 mins
+
+    otpStore[email] = { otp, expiresAt };
     console.log(`✅ OTP for ${email}: ${otp}`);
 
     await sendEmail(
@@ -60,9 +59,6 @@ router.post("/verify-otp", async (req, res) => {
   delete otpStore[email];
 
   try {
-    let user = await User.findOne({ email });
-    if (user) return res.status(400).json({ error: "User already exists" });
-
     if (!registrationNumber) {
       return res.status(400).json({ error: "Registration number is required" });
     }
